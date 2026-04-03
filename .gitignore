@@ -1,0 +1,10 @@
+.envrc
+.direnv/
+
+# python
+.venv/
+venv/
+__pycache__/
+
+# typescript
+node_modules/
