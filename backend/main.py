@@ -1,6 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+
+from extract import html_to_text
+from fetch import FetchError, fetch_url
 
 # default port is 8000
 
@@ -33,11 +36,23 @@ def health():
     return {"ok": True}
 
 # here is POST /analyze endpoint
-# weights are between 0-1
-@app.post("/analyze", response_model=AnalyzeResponse)
+# weights are between 0-1 (stub until TF-IDF in a later phase)
+@app.post("/analyze", response_model=WordResponse)
 def analyze(body: AnalyzeRequest):
-    # TODO: replace with real data later on
-    _ = body.url
+    try:
+        html = fetch_url(body.url)
+    except FetchError as e:
+        raise HTTPException(status_code=400, detail=e.message)
+
+    text = html_to_text(html)
+    if not text:
+        raise HTTPException(
+            status_code=400,
+            detail="no text could be extracted from the page",
+        )
+
+    # TODO: throw words into TF-IDF later on for procecssing
+    _ = text
     return WordResponse(
         words=[
             WordItem(word="stub", weight=1.0),
