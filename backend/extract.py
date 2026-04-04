@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 # converts html to text that we can read and understand
 
 # strip these tags entirely before taking visible text
-TAGS_TO_REMOVE = ("script", "style", "noscript", "img", "meta")
+TAGS_TO_REMOVE = ("script", "style", "noscript", "meta")
 
 
 def html_to_text(html: str) -> str:
