@@ -2,8 +2,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from extract import html_to_text
 from fetch import FetchError, fetch_url
+from extract import html_to_text
+from analyze import keywords_from_text
 
 # default port is 8000
 
@@ -52,11 +53,6 @@ def analyze(body: AnalyzeRequest):
         )
 
     # TODO: throw words into TF-IDF later on for procecssing
-    _ = text
-    return WordResponse(
-        words=[
-            WordItem(word="stub", weight=1.0),
-            WordItem(word="demo", weight=0.5),
-            WordItem(word="topic", weight=0.25),
-        ]
-    )
+    words = keywords_from_text(text)
+    return WordResponse(words=[
+        WordItem(word=word, weight=weight) for word, weight in words])
