@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # installs deps everytime in case
-# runs both backend and frontend servers, closes them on ctrl+c
+# runs both backend and frontend servers
 
 # should work on mac AND linux
 
@@ -24,15 +24,15 @@ npm install
 
 cd "$ROOT"
 
-# Start both servers concurrently
+# start both servers
 echo "Starting servers..."
 # backend
 cd "$ROOT/backend"
-(uvicorn main:app --reload &)
+(uvicorn main:app --reload --port 8000 &)
 
 cd "$ROOT"
 cd "$ROOT/frontend"
-(npm run dev &)
+(npm run dev)
 
 echo "Servers are now both running!"
 echo "Press Ctrl+C to stop both"
