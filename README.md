@@ -6,10 +6,10 @@ Take Home Assessment for Sparrow
 
 - [x] different folders for frontend backend
 - [x] set up api routes (even if placeholder for now)
-- [ ] POST /analyze - returns json?
-- [ ] actually analyze the text we get from the parser
-- [ ] check if the current npm libs we installed are the correct ones or legacy
-- [ ] write up frontend that makes requests, has loading screen, can interpret
+- [x] POST /analyze - returns json?
+- [x] actually analyze the text we get from the parser
+- [x] check if the current npm libs we installed are the correct ones or legacy
+- [x] write up frontend that makes requests, has loading screen, can interpret
       data returned from backend
 
 ## initial ideas for engaging UI

@@ -1,6 +1,7 @@
 import { type FormEvent, useState } from 'react'
 import { analyzeUrl } from './api'
 import type { AnalyzeResponse } from './types'
+import { WordCloud } from './words/WordCloud'
 
 // example links we display in case user doesnt want to enter a URL
 const exampleLinks = [
@@ -15,7 +16,13 @@ const exampleLinks = [
   },
 ]
 
+// make it act like a state, we can toggle
+// home we can insert link and see examples
+// cloud we can see the word cloud
+type Screen = 'home' | 'cloud'
+
 export default function App() {
+  const [screen, setScreen] = useState<Screen>('home')
   const [url, setUrl] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -35,6 +42,7 @@ export default function App() {
     try {
       const data = await analyzeUrl(trimmed)
       setResult(data)
+      setScreen('cloud')
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong.')
     } finally {
@@ -47,9 +55,40 @@ export default function App() {
     void runAnalyze(url)
   }
 
+  // reset
+  function goHome() {
+    setScreen('home')
+    setResult(null)
+    setError(null)
+  }
+
+  // screen acts as a sort of state, we can toggle between HOME and CLOUD
+  if (screen === 'cloud' && result) {
+    return (
+      <div className="flex h-dvh flex-col bg-slate-950 text-slate-100">
+        <header className="flex shrink-0 items-center justify-between gap-4 border-b border-slate-800 px-4 py-3">
+          <button
+            type="button"
+            onClick={goHome}
+            className="rounded-md border border-slate-600 bg-slate-900 px-3 py-1.5 text-sm text-slate-200 hover:bg-slate-800"
+          >
+            ← Back
+          </button>
+          <p className="text-sm text-slate-400">
+            <span className="font-medium text-slate-200">{result.words.length}</span> terms — drag to
+            rotate, scroll to zoom
+          </p>
+        </header>
+        <div className="min-h-0 flex-1">
+          <WordCloud words={result.words} fill />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
-      <main className="mx-auto flex max-w-lg flex-col gap-8 px-4 py-12">
+      <main className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-12">
         <header className="space-y-2">
           <h1 className="text-2xl font-semibold tracking-tight">Omer's 3D Word Cloud</h1>
           <p className="text-sm text-slate-400">
@@ -107,23 +146,6 @@ export default function App() {
           <p className="rounded-md border border-red-900/80 bg-red-950/50 px-3 py-2 text-sm text-red-200">
             {error}
           </p>
-        ) : null}
-
-        {result ? (
-          <section className="space-y-2 rounded-md border border-slate-800 bg-slate-900/50 p-4">
-            <p className="text-sm text-slate-300">
-              Got <span className="font-medium text-slate-100">{result.words.length}</span> terms
-              (preview — 3D cloud later).
-            </p>
-            <ol className="max-h-48 list-decimal space-y-1 overflow-y-auto pl-5 text-sm text-slate-400">
-              {result.words.slice(0, 12).map((w) => (
-                <li key={w.word}>
-                  <span className="text-slate-200">{w.word}</span>{' '}
-                  <span className="text-slate-500">({w.weight.toFixed(2)})</span>
-                </li>
-              ))}
-            </ol>
-          </section>
         ) : null}
       </main>
     </div>
