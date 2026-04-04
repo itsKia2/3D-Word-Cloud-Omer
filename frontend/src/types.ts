@@ -1,10 +1,17 @@
-// types so that we can match types from backend /analyze endpoint
-
 export type WordItem = {
   word: string
   weight: number
 }
 
-export type AnalyzeResponse = {
+export type TopicPayload = {
+  id: number
+  label: string
   words: WordItem[]
+}
+
+export type AnalyzeResponse = {
+  // word cloud
+  words: WordItem[]
+  // topics in floating panel
+  topics: TopicPayload[]
 }

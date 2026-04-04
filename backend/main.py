@@ -4,43 +4,50 @@ from pydantic import BaseModel, Field
 
 from fetch import FetchError, fetch_url
 from extract import html_to_text
-from analyze import keywords_from_text
-
-# default port is 8000
+from analyze import build_analysis
 
 app = FastAPI(title="3D Word Cloud API")
 
-# allow requests from frontend dev server
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
         "http://localhost:5173",
         "http://127.0.0.1:5173",
-        "http://127.0.0.1:3000"
+        "http://127.0.0.1:3000",
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+
 class AnalyzeRequest(BaseModel):
     url: str = Field(..., description="article URL to analyze")
+
 
 class WordItem(BaseModel):
     word: str
     weight: float
 
-class WordResponse(BaseModel):
+
+class TopicItem(BaseModel):
+    id: int
+    label: str
     words: list[WordItem]
+
+
+class AnalyzeResponse(BaseModel):
+    words: list[WordItem]
+    topics: list[TopicItem]
+
 
 @app.get("/health")
 def health():
     return {"ok": True}
 
-# here is POST /analyze endpoint
-# weights are between 0-1 (stub until TF-IDF in a later phase)
-@app.post("/analyze", response_model=WordResponse)
+
+@app.post("/analyze", response_model=AnalyzeResponse)
 def analyze(body: AnalyzeRequest):
     try:
         html = fetch_url(body.url)
@@ -54,6 +61,21 @@ def analyze(body: AnalyzeRequest):
             detail="no text could be extracted from the page",
         )
 
-    words = keywords_from_text(text)
-    return WordResponse(words=[
-        WordItem(word=word, weight=weight) for word, weight in words])
+    raw = build_analysis(text)
+    if not raw["words"]:
+        raise HTTPException(
+            status_code=400,
+            detail="could not extract keywords from the page",
+        )
+
+    return AnalyzeResponse(
+        words=[WordItem(word=w["word"], weight=w["weight"]) for w in raw["words"]],
+        topics=[
+            TopicItem(
+                id=t["id"],
+                label=t["label"],
+                words=[WordItem(word=w["word"], weight=w["weight"]) for w in t["words"]],
+            )
+            for t in raw["topics"]
+        ],
+    )

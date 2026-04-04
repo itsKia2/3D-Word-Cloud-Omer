@@ -8,14 +8,22 @@ TAGS_TO_REMOVE = ("script", "style", "noscript", "meta")
 
 
 def html_to_text(html: str) -> str:
-    # converts html into text using beautifulsoup and lxml
     soup = BeautifulSoup(html, "lxml")
 
     for name in TAGS_TO_REMOVE:
         for tag in soup.find_all(name):
             tag.decompose()
 
+    # one string per <p>, joined with blank lines 
+    # needed for lda chunks otherwise it is one big string
+    paras: list[str] = []
+    for p in soup.find_all("p"):
+        t = " ".join(p.get_text().split())
+        if t:
+            paras.append(t)
+
+    if len(paras) >= 2:
+        return "\n\n".join(paras)
+
     raw = soup.get_text(separator=" ")
-    # collapse runs of whitespace/newlines
-    cleaned = re.sub(r"\s+", " ", raw).strip()
-    return cleaned
+    return re.sub(r"\s+", " ", raw).strip()

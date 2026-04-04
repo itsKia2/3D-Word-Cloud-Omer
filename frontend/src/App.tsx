@@ -16,9 +16,6 @@ const exampleLinks = [
   },
 ]
 
-// make it act like a state, we can toggle
-// home we can insert link and see examples
-// cloud we can see the word cloud
 type Screen = 'home' | 'cloud'
 
 export default function App() {
@@ -55,14 +52,12 @@ export default function App() {
     void runAnalyze(url)
   }
 
-  // reset
   function goHome() {
     setScreen('home')
     setResult(null)
     setError(null)
   }
 
-  // screen acts as a sort of state, we can toggle between HOME and CLOUD
   if (screen === 'cloud' && result) {
     return (
       <div className="flex h-dvh flex-col bg-slate-950 text-slate-100">
@@ -75,12 +70,40 @@ export default function App() {
             ← Back
           </button>
           <p className="text-sm text-slate-400">
-            <span className="font-medium text-slate-200">{result.words.length}</span> terms — drag to
+            <span className="font-medium text-slate-200">{result.words.length}</span> terms —{' '}
+            <span className="font-medium text-slate-200">{result.topics.length}</span> topics — drag to
             rotate, scroll to zoom
           </p>
         </header>
-        <div className="min-h-0 flex-1">
-          <WordCloud words={result.words} fill />
+
+        <div className="relative min-h-0 flex-1">
+          {/* floating topic list — separate from the 3D cloud (TF-IDF words) */}
+          <aside className="absolute left-4 top-4 z-10 max-h-[calc(100%-5rem)] w-72 overflow-y-auto rounded-lg border border-slate-700/90 bg-slate-950/85 p-3 shadow-xl backdrop-blur-md">
+            <h2 className="mb-2 border-b border-slate-700 pb-2 text-sm font-semibold text-slate-200">
+              Topics (LDA)
+            </h2>
+            {result.topics.length === 0 ? (
+              <p className="text-xs text-slate-500">No separate topics for this page.</p>
+            ) : (
+              <ul className="space-y-3">
+                {result.topics.map((t) => (
+                  <li key={t.id} className="border-b border-slate-800 pb-3 last:border-0 last:pb-0">
+                    <p className="text-xs font-medium leading-snug text-sky-300">{t.label}</p>
+                    <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
+                      {t.words
+                        .slice(0, 12)
+                        .map((w) => w.word)
+                        .join(' · ')}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </aside>
+
+          <div className="h-full min-h-0">
+            <WordCloud words={result.words} fill />
+          </div>
         </div>
       </div>
     )

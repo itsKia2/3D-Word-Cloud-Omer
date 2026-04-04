@@ -13,7 +13,6 @@ type Props = {
 }
 
 export function WordCloud({ words, fill }: Props) {
-  // use word layout here
   const placed = layoutWords(words)
   if (placed.length === 0) return null
 
@@ -40,7 +39,7 @@ export function WordCloud({ words, fill }: Props) {
 
         <Suspense fallback={null}>
           {placed.map((p, i) => (
-            <WordLabel key={`${p.item.word}-${i}`} placed={p} />
+            <WordLabel key={`${i}-${p.item.word}`} placed={p} />
           ))}
         </Suspense>
 
