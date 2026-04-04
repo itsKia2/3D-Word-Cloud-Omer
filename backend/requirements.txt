@@ -1,4 +1,7 @@
 fastapi
 scikit-learn
 beautifulsoup4
+lxml
 pandas
+uvicorn
+httpx
